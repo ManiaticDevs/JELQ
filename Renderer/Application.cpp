@@ -1,123 +1,151 @@
 #include <iostream>
 #include <GLFW/glfw3.h>
-#include <GL/glut.h> // I wish I was joking but glut loves iostream, so define iostream before this
+#include <GL/glut.h>
 
-#include "Model.hpp" // our headersss
+constexpr float points[24] = {
+	-5.0, 5.0, 5.0,
+	5.0, 5.0, 5.0,
+	-5.0, -5.0, 5.0,
+	5.0, -5.0, 5.0,
 
-// Best to use the [using namespace] because entry point (main func) would be obscured if we do define this is a class and/or as part of a namespace
-using namespace Renderer;
+	-5.0, 5.0, -5.0,
+	5.0, 5.0, -5.0,
+	-5.0, -5.0, -5.0,
+	5.0, -5.0, -5.0 };
 
-// outline our methods
-void processInput(GLFWwindow* window);
-void showFPS(GLFWwindow* pWindow);
+constexpr int edges[] = {
+	1, 2, 3, 4,
+	5, 6, 7, 8,
+	1, 2, 5, 6,
+	3, 4, 7, 8,
+	5, 1, 7, 3,
+	6, 2, 8, 4 };
 
-// MACROSS! (probably not the best idea but who caress)
-// Camera macros
-#define FOV 45.0f
-#define zNear 0.1f
-#define zFar 100.0f
+constexpr int fov = 90;
 
-// Window macros
-#define w_width 640
-#define w_height 480
+float projX1 = 0.0;
+float projY1 = 0.0;
 
-double lastTime = glfwGetTime();
-int nbFrames;
+float projX2 = 0.0;
+float projY2 = 0.0;
+
+float projX3 = 0.0;
+float projY3 = 0.0;
+
+float projX4 = 0.0;
+float projY4 = 0.0;
 
 int main(void)
 {
-    GLFWwindow* window;
+	GLFWwindow* window;
 
-    if (!glfwInit())
-        return -1;
+	/* Initialize the library */
+	if (!glfwInit())
+		return -1;
 
-    // For perspective reasons we set this up
-    GLfloat aspect = (GLfloat)w_width / (GLfloat)w_height;
-    
-    window = glfwCreateWindow(w_width, w_height, "Hello World", NULL, NULL);
-    
-    // if the window failed to create do this
-    if (!window) 
-    {
-        std::cout << "Failed to create window!\n";
-        glfwTerminate();
-        return -1;
-    }
+	/* Create a windowed mode window and its OpenGL context */
+	window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+	if (!window)
+	{
+		glfwTerminate();
+		return -1;
+	}
 
-    // Assign opengl context to this thread (are we multithreading? nah)
-    glfwMakeContextCurrent(window);
+	int curPoint = 0;
+	float theta = 0.0;
 
-    float pitch = 0.0f; // x axis
-    float yaw = 0.0f;   // y axis
+	/* Make the window's context current */
+	glfwMakeContextCurrent(window);
 
-    // cube model from Model.hpp
-    Cube* cube = new Cube();
+	/* Loop until the user closes the window */
+	while (!glfwWindowShouldClose(window))
+	{
+		/* Render here */
+		glClear(GL_COLOR_BUFFER_BIT);
 
-    lastTime = glfwGetTime();
+		/* while (curPoint < sizeof(edges)) {
 
-    // by default this is set to 1 (and we don't even need the line here) but is capped at 16FPS.
-    // putting it to 0 causes it to run unlimited but allows us to cap the framerate ourselves
-    glfwSwapInterval(1);
+		} */
 
-    // Run this loop whilst user hasn't requested a terminate signal
-    while (!glfwWindowShouldClose(window))
-    {
-        showFPS(window);
-        yaw += 2.2f; // rotate that
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear color and depth buffers (If you don't you get nothing)
-        glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
-        glEnable(GL_DEPTH_TEST);
+		int point1 = edges[curPoint];
+		int point2 = edges[curPoint + 1];
+		int point3 = edges[curPoint + 2];
+		int point4 = edges[curPoint + 3];
 
-        // handle keyboard inputs
-        processInput(window);
+		std::cout << point1 << " " << point2 << " " << point3 << " " << point4 << "\n";
 
-        // Setup camera
-        glMatrixMode(GL_PROJECTION);               // Load in projection mode
-        glLoadIdentity();                          // Reset (because other matrices are being used)
-        gluPerspective(FOV, aspect, zNear, zFar);  // Set the perspective of the camera using defined macros
+		// Point 1
 
-        // We use 1.0 for the angles because that's tells the function to only rotate on that axis hence why the rest are 0.0
-        glRotatef(-90, 1.0, 0.0, 0.0);  // look down
-        glRotatef(-yaw, 0.0, 1.0, 0.0); // rotate along y
-        glTranslatef(0.0, 16.0, 0.0);   // set camera position above the cubes (always do this after rotations)
-        
-        // Draw our cubes! (They all share the same angles tho)
-        cube->draw(0.0f, 0.0f, -7.0f);
-        cube->draw(0.0f, 0.0f, 7.0f);
-        cube->draw(7.0f, 0.0f, 0.0f);
-        cube->draw(-7.0f, 0.0f, 0.0f);
+		float coordX = points[3 * (point1 - 1) + 0];
+		float coordY = points[3 * (point1 - 1) + 1];
+		float coordZ = points[3 * (point1 - 1) + 2];
 
-        // Swap back and front buffers (we are double buffering after all)
-        glfwSwapBuffers(window);
+		coordX = ((coordX * cos(theta)) + (coordZ * sin(theta)));
+		coordZ = ((coordX * -(sin(theta))) + (coordZ * cos(theta)));
 
-        // Try to get any events from window
-        glfwPollEvents();
-    }
-    
-    // Welp the user has requested the terminate signal soo here we are
-    glfwTerminate();
-    return 0;
-}
+		if ((coordZ > 0)) {
+			float projX1 = (coordX) / (coordZ * tan(fov / 2));
+			float projY1 = (coordY) / (coordZ * tan(fov / 2));
+		}
 
-void processInput(GLFWwindow* window) {
-    if (glfwGetKey(window, GLFW_KEY_A)) {
-        std::cout << "Pressing\n";
-    }
-}
+		// Point 2
 
+		coordX = points[3 * (point2 - 1) + 0];
+		coordY = points[3 * (point2 - 1) + 1];
+		coordZ = points[3 * (point2 - 1) + 2];
 
-void showFPS(GLFWwindow* pWindow)
-{
-    // Measure speed
-    double currentTime = glfwGetTime();
-    double delta = currentTime - lastTime;
-    nbFrames++;
-    if (delta >= 1.0) { // If last cout was more than 1 sec ago
-        std::cout << 1000.0 / double(nbFrames) << "\n";
+		coordX = ((coordX * cos(theta)) + (coordZ * sin(theta)));
+		coordZ = ((coordX * -(sin(theta))) + (coordZ * cos(theta)));
 
-        double fps = double(nbFrames) / delta;
+		if ((coordZ > 0)) {
+			float projX2 = (coordX) / (coordZ * tan(fov / 2));
+			float projY2 = (coordY) / (coordZ * tan(fov / 2));
+		}
 
-        nbFrames = 0;
-        lastTime = currentTime;
-    }
+		// Point 3
+
+		coordX = points[3 * (point3 - 1) + 0];
+		coordY = points[3 * (point3 - 1) + 1];
+		coordZ = points[3 * (point3 - 1) + 2];
+
+		coordX = ((coordX * cos(theta)) + (coordZ * sin(theta)));
+		coordZ = ((coordX * -(sin(theta))) + (coordZ * cos(theta)));
+
+		if ((coordZ > 0)) {
+			float projX3 = (coordX) / (coordZ * tan(fov / 2));
+			float projY3 = (coordY) / (coordZ * tan(fov / 2));
+		}
+
+		// Point 4
+
+		coordX = points[3 * (point4 - 1) + 0];
+		coordY = points[3 * (point4 - 1) + 1];
+		coordZ = points[3 * (point4 - 1) + 2];
+
+		coordX = ((coordX * cos(theta)) + (coordZ * sin(theta)));
+		coordZ = ((coordX * -(sin(theta))) + (coordZ * cos(theta)));
+
+		if ((coordZ > 0)) {
+			float projX4 = (coordX) / (coordZ * tan(fov / 2));
+			float projY4 = (coordY) / (coordZ * tan(fov / 2));
+		}
+
+		glBegin(GL_QUADS);
+		// glColor3f((rand() % 101)/100, (rand() % 101) / 100, (rand() % 101) / 100);
+		glColor3f(0, 0, 1);
+		glVertex2f(projX1, projY1);
+		glVertex2f(projX2, projY2);
+		glVertex2f(projX3, projY3);
+		glVertex2f(projX4, projY4);
+		glEnd();
+
+		/* Swap front and back buffers */
+		glfwSwapBuffers(window);
+
+		/* Poll for and process events */
+		glfwPollEvents();
+	}
+
+	glfwTerminate();
+	return 0;
 }

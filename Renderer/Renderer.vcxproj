@@ -147,9 +147,15 @@
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="Model.cpp" />
+    <ClCompile Include="PerspectiveProj.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Model.hpp" />
+    <ClInclude Include="PerspectiveProj.h" />
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Renderer.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
