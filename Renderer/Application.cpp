@@ -35,6 +35,15 @@ float projY3 = 0.0;
 float projX4 = 0.0;
 float projY4 = 0.0;
 
+int point1 = 0;
+int point2 = 0;
+int point3 = 0;
+int point4 = 0;
+
+float coordX = 0.0;
+float coordY = 0.0;
+float coordZ = 0.0;
+
 int main(void)
 {
 	GLFWwindow* window;
@@ -63,81 +72,86 @@ int main(void)
 		/* Render here */
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		/* while (curPoint < sizeof(edges)) {
+		if (curPoint < std::size(edges) && (!(point1 >= std::size(points)) || !(point2 >= std::size(points)) || !(point3 >= std::size(points)) || !(point4 >= std::size(points)))) {
+			point1 = edges[curPoint];
+			point2 = edges[curPoint + 1];
+			point3 = edges[curPoint + 2];
+			point4 = edges[curPoint + 3];
 
-		} */
+			// Point 1
+			
+			std::cout << point1 << "\n";
+			
+			coordX = points[3 * (point1 - 1) + 0];
+			coordY = points[3 * (point1 - 1) + 1];
+			coordZ = points[3 * (point1 - 1) + 2];
 
-		int point1 = edges[curPoint];
-		int point2 = edges[curPoint + 1];
-		int point3 = edges[curPoint + 2];
-		int point4 = edges[curPoint + 3];
+			coordX = ((coordX * cos(theta)) + (coordZ * sin(theta)));
+			coordZ = ((coordX * -(sin(theta))) + (coordZ * cos(theta)));
 
-		std::cout << point1 << " " << point2 << " " << point3 << " " << point4 << "\n";
+			if ((coordZ > 0)) {
+				projX1 = (coordX) / (coordZ * tan(fov / 2));
+				projY1 = (coordY) / (coordZ * tan(fov / 2));
+			}
 
-		// Point 1
+			// Point 2
 
-		float coordX = points[3 * (point1 - 1) + 0];
-		float coordY = points[3 * (point1 - 1) + 1];
-		float coordZ = points[3 * (point1 - 1) + 2];
+			coordX = points[3 * (point2 - 1) + 0];
+			coordY = points[3 * (point2 - 1) + 1];
+			coordZ = points[3 * (point2 - 1) + 2];
 
-		coordX = ((coordX * cos(theta)) + (coordZ * sin(theta)));
-		coordZ = ((coordX * -(sin(theta))) + (coordZ * cos(theta)));
+			coordX = ((coordX * cos(theta)) + (coordZ * sin(theta)));
+			coordZ = ((coordX * -(sin(theta))) + (coordZ * cos(theta)));
 
-		if ((coordZ > 0)) {
-			float projX1 = (coordX) / (coordZ * tan(fov / 2));
-			float projY1 = (coordY) / (coordZ * tan(fov / 2));
+			if ((coordZ > 0)) {
+				projX2 = (coordX) / (coordZ * tan(fov / 2));
+				projY2 = (coordY) / (coordZ * tan(fov / 2));
+			}
+
+			// Point 3
+
+			coordX = points[3 * (point3 - 1) + 0];
+			coordY = points[3 * (point3 - 1) + 1];
+			coordZ = points[3 * (point3 - 1) + 2];
+
+			coordX = ((coordX * cos(theta)) + (coordZ * sin(theta)));
+			coordZ = ((coordX * -(sin(theta))) + (coordZ * cos(theta)));
+
+			if ((coordZ > 0)) {
+				projX3 = (coordX) / (coordZ * tan(fov / 2));
+				projY3 = (coordY) / (coordZ * tan(fov / 2));
+			}
+
+			// Point 4
+
+			coordX = points[3 * (point4 - 1) + 0];
+			coordY = points[3 * (point4 - 1) + 1];
+			coordZ = points[3 * (point4 - 1) + 2];
+
+			coordX = ((coordX * cos(theta)) + (coordZ * sin(theta)));
+			coordZ = ((coordX * -(sin(theta))) + (coordZ * cos(theta)));
+
+			if ((coordZ > 0)) {
+				projX4 = (coordX) / (coordZ * tan(fov / 2));
+				projY4 = (coordY) / (coordZ * tan(fov / 2));
+			}
+
+			glBegin(GL_QUADS);
+			// glColor3f((rand() % 101)/100, (rand() % 101) / 100, (rand() % 101) / 100);
+			glVertex2f(projX1, projY1);
+			glVertex2f(projX2, projY2);
+			glVertex2f(projX3, projY3);
+			glVertex2f(projX4, projY4);
+			glEnd();
+
+			std::cout << projX1 << " " << projY1 << "\n";
+
+			curPoint = curPoint + 4;
+
+			if (curPoint < std::size(edges)) {
+				curPoint = 0;
+			}
 		}
-
-		// Point 2
-
-		coordX = points[3 * (point2 - 1) + 0];
-		coordY = points[3 * (point2 - 1) + 1];
-		coordZ = points[3 * (point2 - 1) + 2];
-
-		coordX = ((coordX * cos(theta)) + (coordZ * sin(theta)));
-		coordZ = ((coordX * -(sin(theta))) + (coordZ * cos(theta)));
-
-		if ((coordZ > 0)) {
-			float projX2 = (coordX) / (coordZ * tan(fov / 2));
-			float projY2 = (coordY) / (coordZ * tan(fov / 2));
-		}
-
-		// Point 3
-
-		coordX = points[3 * (point3 - 1) + 0];
-		coordY = points[3 * (point3 - 1) + 1];
-		coordZ = points[3 * (point3 - 1) + 2];
-
-		coordX = ((coordX * cos(theta)) + (coordZ * sin(theta)));
-		coordZ = ((coordX * -(sin(theta))) + (coordZ * cos(theta)));
-
-		if ((coordZ > 0)) {
-			float projX3 = (coordX) / (coordZ * tan(fov / 2));
-			float projY3 = (coordY) / (coordZ * tan(fov / 2));
-		}
-
-		// Point 4
-
-		coordX = points[3 * (point4 - 1) + 0];
-		coordY = points[3 * (point4 - 1) + 1];
-		coordZ = points[3 * (point4 - 1) + 2];
-
-		coordX = ((coordX * cos(theta)) + (coordZ * sin(theta)));
-		coordZ = ((coordX * -(sin(theta))) + (coordZ * cos(theta)));
-
-		if ((coordZ > 0)) {
-			float projX4 = (coordX) / (coordZ * tan(fov / 2));
-			float projY4 = (coordY) / (coordZ * tan(fov / 2));
-		}
-
-		glBegin(GL_QUADS);
-		// glColor3f((rand() % 101)/100, (rand() % 101) / 100, (rand() % 101) / 100);
-		glColor3f(0, 0, 1);
-		glVertex2f(projX1, projY1);
-		glVertex2f(projX2, projY2);
-		glVertex2f(projX3, projY3);
-		glVertex2f(projX4, projY4);
-		glEnd();
 
 		/* Swap front and back buffers */
 		glfwSwapBuffers(window);
